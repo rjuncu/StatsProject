@@ -161,7 +161,7 @@ ggplot(data = titanicC.mod, aes(x = survived)) +
   ggtitle("Proportion of Survivors \nGrouped by Class")
 
 #class, sex and survivor
-ggplot(data = titanicC.mod, aes(x = survived)) +
+g5 <- ggplot(data = titanicC.mod, aes(x = survived)) +
   geom_bar(aes(y = (..count..)/sum(..count..), fill = class, alpha = sex)) + 
   ylab("proportion") +
   ggtitle("Proportion of Survivors \nGrouped by Class and Sex")
@@ -174,12 +174,40 @@ ggplot(titanicC, aes(y= age, group = sex, fill = factor(sex))) +
   geom_boxplot(aes())
 
 
-ggplot(titanicC.mod, aes(x = age)) +
+g1 <- ggplot(titanicC.mod, aes(x = age)) +
   geom_histogram() + 
   facet_nested(class + sex ~ survived) +
-  ggtitle("Comparison of Age Faceted By \nSurvival and Nested Class and Sex")
+  ggtitle("Comparison of Age Faceted By \nSurvival and Nested Class and Sex") +
+  theme_bw()
 
 
+g2 <- ggplot(titanicC.mod, aes(x = age, fill = class, alpha = survived)) +
+  geom_boxplot() + 
+  facet_nested(class + sex ~ survived) +
+  ggtitle("Comparison of Age Faceted By \nSurvival and Nested Class and Sex") +
+  theme_bw()
+
+
+
+g3 <- ggplot(titanicC.mod, aes(x = age)) +
+  geom_histogram() + 
+  facet_nested(class ~ survived) +
+  ggtitle("Comparison of Age Faceted By \nSurvival and Nested Class and Sex") +
+  theme_bw()
+
+
+g4 <- ggplot(titanicC.mod, aes(x = age, fill = class, alpha = survived)) +
+  geom_boxplot() + 
+  facet_nested(class ~ survived) +
+  ggtitle("Comparison of Age Faceted By \nSurvival and Nested Class and Sex") +
+  theme_bw()
+
+
+figure <- ggarrange(g5,g1,g2,
+                    labels = c("A", "B","c"),
+                    ncol = 3, nrow =1)
+figure
+library(ggpubr)
 
 ############TOOO Work ON
 
