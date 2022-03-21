@@ -1,5 +1,18 @@
-
 #Project 1: Stat for Bioinformatics
+
+#libraries
+library(pastecs)
+library(mice)
+library(lattice)
+library(VIM)
+library(aod)
+library(BaM)
+library(ggplot2)
+library(reshape2)
+library(ggh4x)
+library(tidyverse)
+library(gridExtra)
+library("AICcmodavg")
 
 ######### Set up
 #set wd
@@ -15,7 +28,6 @@ head(titanicC)
 names(titanicC)
 
 ######### Descriptive Statistics
-library("pastecs")
 descrip.titanicC <- stat.desc(titanicC[,names(titanicC)],basic=TRUE, desc=TRUE)
 descrip.titanicC
 
@@ -108,7 +120,6 @@ OR.class.sex
 
 
 #construct table
-library(gridExtra)
 odds.df <- data.frame(Variable = c("sex", "class", "class and sex"), 
                       Odds = c(odds.survival.female, odds.survival.class, odds.survival.class.sex),
                       Odd.Ratio = c(OR.sex, OR.class, OR.class.sex))
@@ -125,9 +136,6 @@ exp(cbind(OR =titanic.survival.class$coefficients, confint(titanic.survival.clas
 exp(cbind(OR =titanic.survival.class.sex$coefficients, confint(titanic.survival.class.sex)))
 
 ########## Visualization
-library(ggplot2)
-library(ggh4x)
-library(tidyverse)
 titanicC
 #make bar charts to visually confirm probabilities
 #calculated above
@@ -233,7 +241,6 @@ ggplot(titanicC, aes(x=sex, y=survived, color = factor(class))) +
 
 ####PROBABLY NOT NEEDED
 ###APPLY AIC TO ALL MODELS
-library("AICcmodavg")
 titanic.list <- list()
 
 titanic.list[[1]] <- glm(survived ~ age, data = titanicC, family = binomial(link = "logit")) 
