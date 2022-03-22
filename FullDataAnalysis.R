@@ -12,7 +12,8 @@ library(reshape2)
 library(ggh4x)
 library(tidyverse)
 library(gridExtra)
-library("AICcmodavg")
+library(AICcmodavg)
+library(ggpubr)
 
 ######### Set up
 #set wd
@@ -164,7 +165,7 @@ ggplot(data = titanicC.mod, aes(x = survived)) +
 g5 <- ggplot(data = titanicC.mod, aes(x = survived)) +
   geom_bar(aes(y = (..count..)/sum(..count..), fill = class, alpha = sex)) + 
   ylab("proportion") +
-  ggtitle("Proportion of Survivors \nGrouped by Class and Sex")
+  ggtitle("Proportion of Survivors \nGrouped by Class and Sex") + theme_bw()
 
 
 
@@ -207,7 +208,6 @@ figure <- ggarrange(g5,g1,g2,
                     labels = c("A", "B","c"),
                     ncol = 3, nrow =1)
 figure
-library(ggpubr)
 
 ############TOOO Work ON
 
