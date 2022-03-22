@@ -112,6 +112,19 @@ m4 <- histMiss(y, only.miss = FALSE, sub = "D", main ="Histogram of Passengers A
 
 
 #-----------------Part 6: Comparing Analyses------------------------
+
+####Generate odds ratio for class and sex for each data set
+#CD
+exp(cbind(OR =titanicC.glm$coefficients, confint(titanicC.glm)))
+
+#CC
+
+#MI
+
+#IPW
+
+
+#Plot comparing Age distribution
 #put all age columns of datasets into one dataframe
 all.age <- data.frame("CD" = titanicC$age, "CC" = titanicI$age)
 all.ready <- melt(all.age)
