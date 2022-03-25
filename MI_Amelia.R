@@ -64,6 +64,13 @@ barMiss(titanic.vim[,c("sex","age")], interactive = TRUE) #Missing obs in sex
 # logit [P(Y = 1|class, sex, age)] = B0 + B1 ? class + B2 ? sex + B3 ? age
 
 
+#Sensitivity analysis
+
+
+#The model we are working with will be 
+# logit [P(Y = 1|class, sex, age)] = B0 + B1 ? class + B2 ? sex + B3 ? age
+
+
 #MICE
 
 pattern <- md.pattern(titanic)
@@ -156,26 +163,97 @@ complete_pmm <- complete(imp_mice_pmm, 1)
 summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm))$coefficients
 ### - Deviance -
 summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm))$deviance
+#233.7264
 ### - Pseudo R? -
-library(pscl)
 pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm))
 #We only have a small value of 0.1528244 which means that we can only explain this part of the deviance by the model
 
-
-
-
-
-#------------------------Doesnt work? No idea why. (Error in is.data.frame(labels) : object 'survived' not found)
-library(ROCR)
+#------------------------PMM analysis ROC curve
 names(complete_pmm)
 glm_pmm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm)
 
-pred_m1 <- prediction(fitted(glm_pmm), titanic$survived)
+pred_m1 <- prediction(fitted(glm_pmm), complete_pmm$survived)
 perf_m1 <- performance(pred_m1, measure = "tpr", x.measure = "fpr")
-plot(perf_m1, main = "sensitivity vs false positive rate", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+plot(perf_m1, main = "Sensitivity vs False Positive Rate", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
 performance(pred_m1, measure = "auc")@y.values
+#Area under the curve. This model explains 75.9% of all data
 
-table(survived, fitted(glm_pmm)>0.5)
+table(complete_pmm$survived, fitted(glm_pmm)>0.4) #unnecessary
+#----------------------
+
+
+#Lasso Regression
+complete_lassonorm <- complete(imp_mice_lassonorm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm))$coefficients
+### - Deviance -
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm))$deviance
+#234.2229
+### - Pseudo R? -
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm))
+#We only have a small value of 0.1552194 which means that we can only explain this part of the deviance by the model
+
+#------------------------ analysis ROC curve
+names(complete_lassonorm)
+glm_lassonorm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm)
+
+pred_m2 <- prediction(fitted(glm_lassonorm), complete_lassonorm$survived)
+perf_m2 <- performance(pred_m2, measure = "tpr", x.measure = "fpr")
+plot(perf_m2, main = "Sensitivity vs False Positive Rate, Lasso", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m2, measure = "auc")@y.values
+#Area under the curve. This model explains 75.5% of all data
+
+
+#Bayesian linear regression
+complete_norm <- complete(imp_mice_norm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm))$coefficients
+### - Deviance -
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm))$deviance
+#228.8713
+### - Pseudo R? -
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm))
+#We only have a small value of 0.1745212 which means that we can only explain this part of the deviance by the model
+
+#------------------------ analysis ROC curve
+names(complete_norm)
+glm_norm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm)
+
+pred_m3 <- prediction(fitted(glm_norm), complete_norm$survived)
+perf_m3 <- performance(pred_m3, measure = "tpr", x.measure = "fpr")
+plot(perf_m3, main = "Sensitivity vs False Positive Rate, Bayesian", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m3, measure = "auc")@y.values
+#Area under the curve. This model explains 77.3% of all data
+
+
+
+#Weighted predictive mean matching
+complete_wpmm <- complete(imp_mice_wpmm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm))$coefficients
+### - Deviance -
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm))$deviance
+#232.2783
+### - Pseudo R? -
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm))
+#We only have a small value of 0.1622332 which means that we can only explain this part of the deviance by the model
+
+#------------------------ analysis ROC curve
+names(complete_wpmm)
+glm_wpmm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm)
+
+pred_m4 <- prediction(fitted(glm_wpmm), complete_wpmm$survived)
+perf_m4 <- performance(pred_m4, measure = "tpr", x.measure = "fpr")
+plot(perf_m4, main = "Sensitivity vs False Positive Rate, WPMM", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m4, measure = "auc")@y.values
+#Area under the curve. This model explains 78.65% of all data
+
+
+#Compare all 4 methods in one graph
+plot(perf_m1, colorize = FALSE, lwd = 3, col = "red", main = "Sensitivity vs False Positive Rate")
+legend("bottomright", c("Predictive Mean Matching", "Lasso Linear Regression", "Bayesian linear regression", "Weighted predictive mean matching"), lty=1, 
+       col = c("red", "blue", "green", "orange"), bty="n")
+plot(perf_m2, add = TRUE, colorize = FALSE, lwd = 3, col="blue")
+plot(perf_m3, add = TRUE, colorize = FALSE, lwd = 3, col ="green")
+plot(perf_m4, add = TRUE, colorize = FALSE, lwd = 3, col = "orange")
+abline(0, 1, lty = 2)
 #----------------------
 
 ###################################
