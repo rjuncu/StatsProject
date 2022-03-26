@@ -23,6 +23,8 @@ library(gridExtra)
 library(AICcmodavg)
 library(ggpubr)
 library(ggplotify)
+library(pscl)
+library(ROCR)
 
 #set wd
 setwd("C:/Users/isaac/Education/UVM/R/KU/BioinformaticStats/Project1/StatsProject")
@@ -273,15 +275,17 @@ exp(cbind(OR =glm_norm$coefficients, confint(glm_norm)))
 #IPW
 exp(cbind(OR =titanic.results.ipw$coefficients, confint(titanic.results.ipw)))
 
-#Plot comparing Age distribution
-#put all age columns of datasets into one dataframe
-all.age <- data.frame("CD" = titanicC$age, "CC" = titanicI$age, "IPW")
-all.ready <- melt(all.age)
+####AIC analysis
+# Fitting the models
+titanic.list=list()
 
-#plot the distributions of ages by dataset
-plt <- ggplot(data = all.ready, aes(x = variable, y = value, fill = variable)) + 
-  geom_boxplot() + labs(x = "Dataset", y = "Age") +
-  ggtitle("Spread of Ages By Dataset")
+titanic.list[[1]]=titanicC.glm
+#CC omitted because only using 109 observations 
+titanic.list[[2]]=glm_norm
+titanic.list[[3]]=titanic.results.ipw
 
-plt
+titanic.modnames <- c("CD",  "MI", "IPW")
 
+## Akaike weights with AICcmodavg
+titanic.aictab=aictab(cand.set = titanic.list, modnames = titanic.modnames)
+titanic.aictab
