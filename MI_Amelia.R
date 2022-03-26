@@ -66,7 +66,6 @@ barMiss(titanic.vim[,c("sex","age")], interactive = TRUE) #Missing obs in sex
 
 #Sensitivity analysis
 
-
 #The model we are working with will be 
 # logit [P(Y = 1|class, sex, age)] = B0 + B1 ? class + B2 ? sex + B3 ? age
 
@@ -155,7 +154,7 @@ fit_wpmm <- with(data=imp_mice_wpmm, exp=glm(survived ~ class + sex + age, famil
 estimate_wpmm <- pool(fit_wpmm)
 summary(estimate_wpmm) #age is not a significant variable
 
-##LOG TEST
+##LOG TEST SENSITIVITY
 
 #PMM
 ### - Wald test to test significance of regression coefficients -

@@ -108,6 +108,137 @@ summary(titanicI.glm)
 
 #-----------------Part 4: MI Analysis-------------------------------
 
+#Imputting the missing values
+
+imp_mice_pmm <- mice(titanicI, m = 100) 
+imp_mice_pmm #PMM = predictive mean matching 
+
+
+imp_mice_lassonorm <- mice(titanicI, m = 100, method = "lasso.norm")
+imp_mice_lassonorm #Lasso regression for age
+
+
+imp_mice_norm <- mice(titanicI, m =100, method = "norm")
+imp_mice_norm #Bayesian linear regression
+
+
+imp_mice_wpmm <- mice(titanicI, m =100, method = "midastouch")
+imp_mice_wpmm #Weighted predictive mean matching
+
+
+#PMM
+complete(imp_mice_pmm, 1)
+com_pmm <- complete(imp_mice_pmm, action ="long", inc=T)
+col_pmm <- rep(c("blue","red")[1+as.numeric(is.na(imp_mice_pmm$data$age))],101)
+stripplot(age~.imp, data=com_pmm, jit=FALSE, fac=0.8, col=col_pmm, pch=20, cex=1.4,
+          xlab= "Imputation number", main = "Distribution of the imputed data")
+fit_pmm <- with(data=imp_mice_pmm, exp=glm(survived ~ class + sex + age, family=binomial))
+estimate_pmm <- pool(fit_pmm)
+summary(estimate_pmm)
+
+### - Wald test to test significance of regression coefficients
+complete_pmm <- complete(imp_mice_pmm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm))$coefficients
+### - Deviance
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm))$deviance #233.7264
+### - Pseudo R? -
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm)) #0.1528244
+
+#PMM analysis ROC curve
+names(complete_pmm)
+glm_pmm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_pmm)
+pred_m1 <- prediction(fitted(glm_pmm), complete_pmm$survived)
+perf_m1 <- performance(pred_m1, measure = "tpr", x.measure = "fpr")
+plot(perf_m1, main = "Sensitivity vs False Positive Rate", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m1, measure = "auc")@y.values
+#Area under the curve. This model explains 75.9% of all data
+
+
+#LASSO
+complete(imp_mice_lassonorm, 1) 
+com_lassonorm <- complete(imp_mice_lassonorm, action ="long", inc=T)
+fit_lassonorm <- with(data=imp_mice_lassonorm, exp=glm(survived ~ class + sex + age, family=binomial))
+estimate_lassonorm <- pool(fit_lassonorm)
+summary(estimate_lassonorm) 
+
+###Wald Test
+complete_lassonorm <- complete(imp_mice_lassonorm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm))$coefficients
+### - Deviance -
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm))$deviance #234.2229
+### - Pseudo R? -
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm)) #0.1552194
+
+#Analysis ROC curve
+names(complete_lassonorm)
+glm_lassonorm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_lassonorm)
+pred_m2 <- prediction(fitted(glm_lassonorm), complete_lassonorm$survived)
+perf_m2 <- performance(pred_m2, measure = "tpr", x.measure = "fpr")
+plot(perf_m2, main = "Sensitivity vs False Positive Rate, Lasso", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m2, measure = "auc")@y.values
+#Area under the curve. This model explains 75.5% of all data
+
+
+
+#BAYESIAN LINEAR REGRESSION
+complete(imp_mice_norm, 1) 
+com_norm <- complete(imp_mice_norm, action ="long", inc=T)
+fit_norm <- with(data=imp_mice_norm, exp=glm(survived ~ class + sex + age, family=binomial))
+estimate_norm <- pool(fit_norm)
+summary(estimate_norm)
+
+###Wald Test
+complete_norm <- complete(imp_mice_norm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm))$coefficients
+### - Deviance
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm))$deviance #228.8713
+### - Pseudo R
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm)) #0.1745212
+
+#Analysis ROC curve
+names(complete_norm)
+glm_norm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_norm)
+pred_m3 <- prediction(fitted(glm_norm), complete_norm$survived)
+perf_m3 <- performance(pred_m3, measure = "tpr", x.measure = "fpr")
+plot(perf_m3, main = "Sensitivity vs False Positive Rate, Bayesian", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m3, measure = "auc")@y.values
+#Area under the curve. This model explains 77.3% of all data
+
+
+#WEIGHTED PMM
+complete(imp_mice_wpmm, 1) 
+com_wpmm <- complete(imp_mice_wpmm, action ="long", inc=T)
+fit_wpmm <- with(data=imp_mice_wpmm, exp=glm(survived ~ class + sex + age, family=binomial))
+estimate_wpmm <- pool(fit_wpmm)
+summary(estimate_wpmm)
+
+#Wald Test
+complete_wpmm <- complete(imp_mice_wpmm, 1)
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm))$coefficients
+### - Deviance
+summary(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm))$deviance #232.2783
+### - Pseudo R
+pR2(glm(formula = survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm)) #0.1622332
+
+#Analysis ROC curve
+names(complete_wpmm)
+glm_wpmm <- glm(survived ~ class + sex + age, family = binomial(link = logit), data = complete_wpmm)
+pred_m4 <- prediction(fitted(glm_wpmm), complete_wpmm$survived)
+perf_m4 <- performance(pred_m4, measure = "tpr", x.measure = "fpr")
+plot(perf_m4, main = "Sensitivity vs False Positive Rate, WPMM", colorize = TRUE, colorkey.relwidth = 0.5, lwd = 4.5)
+performance(pred_m4, measure = "auc")@y.values
+#Area under the curve. This model explains 78.65% of all data
+
+
+#COMPARE ALL 4 METHODS IN 1 GRAPH
+plot(perf_m1, colorize = FALSE, lwd = 3, col = "red", main = "Sensitivity vs False Positive Rate")
+legend("bottomright", c("Predictive Mean Matching", "Lasso Linear Regression", "Bayesian linear regression", "Weighted predictive mean matching"), lty=1, 
+       col = c("red", "blue", "green", "orange"), bty="n")
+plot(perf_m2, add = TRUE, colorize = FALSE, lwd = 3, col="blue")
+plot(perf_m3, add = TRUE, colorize = FALSE, lwd = 3, col ="green")
+plot(perf_m4, add = TRUE, colorize = FALSE, lwd = 3, col = "orange")
+abline(0, 1, lty = 2)
+
 
 #-----------------Part 5: IPW Analysis------------------------------
 ## Creating the missing data indicator variable r
@@ -137,6 +268,7 @@ exp(cbind(OR =titanicC.glm$coefficients, confint(titanicC.glm)))
 exp(cbind(OR =titanicI.glm$coefficients, confint(titanicI.glm)))
 
 #MI
+exp(cbind(OR =glm_norm$coefficients, confint(glm_norm)))
 
 #IPW
 exp(cbind(OR =titanic.results.ipw$coefficients, confint(titanic.results.ipw)))
