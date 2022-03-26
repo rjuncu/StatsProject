@@ -104,7 +104,7 @@ m4 <- histMiss(y, only.miss = FALSE, sub = "D", main ="Histogram of Passengers A
 
 
 #-----------------Part 3: CC Analysis-------------------------------
-#generate the logisitc regression modle for complete case analysis
+#generate the logistic regression model for complete case analysis
 titanicI.glm <- glm(survived ~ class+sex+age,data=titanicI, family=binomial(link="logit"))
 summary(titanicI.glm)
 
@@ -181,7 +181,6 @@ performance(pred_m2, measure = "auc")@y.values
 #Area under the curve. This model explains 75.5% of all data
 
 
-
 #BAYESIAN LINEAR REGRESSION
 complete(imp_mice_norm, 1) 
 com_norm <- complete(imp_mice_norm, action ="long", inc=T)
@@ -256,7 +255,7 @@ titanicI$w <- 1 / fitted(titanic.ipw.glm)
 head(titanicI)
 
 ## Constructing the logistic regression model
-titanic.results.ipw <- glm(survived ~ class + sex + age, data = titanicI, weights = titanicI$w, family = binomial)
+titanic.results.ipw <- glm(survived ~ class + sex + age, data = titanicI, weights = titanicI$w, family = binomial(link="logit"))
 summary(titanic.results.ipw)
 
 
