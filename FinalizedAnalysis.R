@@ -102,7 +102,9 @@ m4 <- histMiss(y, only.miss = FALSE, sub = "D", main ="Histogram of Passengers A
 
 
 #-----------------Part 3: CC Analysis-------------------------------
-
+#generate the logisitc regression modle for complete case analysis
+titanicI.glm <- glm(survived ~ class+sex+age,data=titanicI, family=binomial(link="logit"))
+summary(titanicI.glm)
 
 #-----------------Part 4: MI Analysis-------------------------------
 
@@ -132,15 +134,16 @@ summary(titanic.results.ipw)
 exp(cbind(OR =titanicC.glm$coefficients, confint(titanicC.glm)))
 
 #CC
+exp(cbind(OR =titanicI.glm$coefficients, confint(titanicI.glm)))
 
 #MI
 
 #IPW
-
+exp(cbind(OR =titanic.results.ipw$coefficients, confint(titanic.results.ipw)))
 
 #Plot comparing Age distribution
 #put all age columns of datasets into one dataframe
-all.age <- data.frame("CD" = titanicC$age, "CC" = titanicI$age)
+all.age <- data.frame("CD" = titanicC$age, "CC" = titanicI$age, "IPW")
 all.ready <- melt(all.age)
 
 #plot the distributions of ages by dataset
