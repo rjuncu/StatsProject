@@ -108,7 +108,21 @@ m4 <- histMiss(y, only.miss = FALSE, sub = "D", main ="Histogram of Passengers A
 
 
 #-----------------Part 5: IPW Analysis------------------------------
+## Creating the missing data indicator variable r
+titanicI$r <- as.numeric(!is.na(titanicI$age))*as.numeric(!is.na(titanicI$sex))
+head(titanicI)
 
+## Fitting the logistic regression model to calculate the probabilities of being complete
+titanic.ipw.glm <- glm(r ~ class + survived, data = titanicI, family = binomial)
+summary(titanic.ipw.glm)
+
+## Calculating the weights: Inverse Probabilities
+titanicI$w <- 1 / fitted(titanic.ipw.glm)
+head(titanicI)
+
+## Constructing the logistic regression model
+titanic.results.ipw <- glm(survived ~ class + sex + age, data = titanicI, weights = titanicI$w, family = binomial)
+summary(titanic.results.ipw)
 
 
 #-----------------Part 6: Comparing Analyses------------------------
