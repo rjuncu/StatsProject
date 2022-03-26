@@ -283,7 +283,7 @@ titanic.list[[1]]=titanicC.glm
 titanic.list[[2]]=glm_norm
 titanic.list[[3]]=titanic.results.ipw
 
-titanic.modnames <- c("CD",  "MI", "IPW")
+titanic.modnames <- c("CD", "CC", "MI", "IPW")
 
 ## Akaike weights with AICcmodavg
 titanic.aictab=aictab(cand.set = titanic.list, modnames = titanic.modnames)
